@@ -213,7 +213,7 @@ function OutputViewer(props: OutputViewerProps) {
         height={props.sourcePlayback.height}
       />
       <IconButton className={classes.button} id="screenshot">
-        <CameraAltTwoTone />
+        <CameraAltTwoTone style={{ fontSize: 32 }} />
       </IconButton>
       {/* <Typography className={classes.stats} variant="caption">
         {stats}

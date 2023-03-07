@@ -43,6 +43,18 @@ function BackgroundConfigCard(props: BackgroundConfigCardProps) {
         slidesPerView={1}
         spaceBetween={10}
         breakpoints={{
+          320: {
+            slidesPerView: 4,
+            spaceBetween: 10,
+          },
+          375: {
+            slidesPerView: 5,
+            spaceBetween: 10,
+          },
+          414: {
+            slidesPerView: 6,
+            spaceBetween: 10,
+          },
           640: {
             slidesPerView: 11,
             spaceBetween: 20,
@@ -56,6 +68,7 @@ function BackgroundConfigCard(props: BackgroundConfigCardProps) {
             spaceBetween: 50,
           },
         }}
+        loop
         centeredSlides={true}
         // pagination={{ clickable: true }}
         initialSlide={2}
