@@ -1,3 +1,4 @@
+import { IconButton, Modal } from '@material-ui/core'
 import Avatar from '@material-ui/core/Avatar'
 import Paper from '@material-ui/core/Paper'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
@@ -10,6 +11,7 @@ import { SourceConfig, SourcePlayback } from '../helpers/sourceHelper'
 import { TFLite } from '../hooks/useTFLite'
 import OutputViewer from './OutputViewer'
 import SourceViewer from './SourceViewer'
+import { CloseOutlined, CloudDownloadOutlined, FontDownloadOutlined, ShareOutlined } from '@material-ui/icons'
 
 type ViewerCardProps = {
   sourceConfig: SourceConfig
@@ -23,7 +25,10 @@ type ViewerCardProps = {
 function ViewerCard(props: ViewerCardProps) {
   const classes = useStyles()
   const [sourcePlayback, setSourcePlayback] = useState<SourcePlayback>()
-
+  const [open, setOpen] = useState(false)
+  const handleOpen = () => setOpen(true)
+  const handleClose = () => setOpen(false)
+  const [ImageSource, setImageSource] = useState('')
   useEffect(() => {
     setSourcePlayback(undefined)
   }, [props.sourceConfig])
@@ -37,14 +42,53 @@ function ViewerCard(props: ViewerCardProps) {
         />
       </div>
       {sourcePlayback && props.bodyPix && props.tflite ? (
-        <OutputViewer
-          sourcePlayback={sourcePlayback}
-          backgroundConfig={props.backgroundConfig}
-          segmentationConfig={props.segmentationConfig}
-          postProcessingConfig={props.postProcessingConfig}
-          bodyPix={props.bodyPix}
-          tflite={props.tflite}
-        />
+        <>
+          <Modal
+            open={open}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%',
+            }}
+            // onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <div className={classes.modal}>
+              <IconButton
+                className={classes.iconButtonClose}
+                onClick={handleClose}
+              >
+                <CloseOutlined style={{ fontSize: 40 }} />
+              </IconButton>
+              <IconButton
+                className={classes.iconButtonShare}
+                onClick={() => {}}
+              >
+                <ShareOutlined style={{ fontSize: 40 }} />
+              </IconButton>
+              <IconButton
+                className={classes.iconButtonSave}
+                onClick={handleClose}
+              >
+                <CloudDownloadOutlined style={{ fontSize: 40 }} />
+              </IconButton>
+              <img src={ImageSource} className={classes.imageShot} alt="shot" />
+            </div>
+          </Modal>
+          <OutputViewer
+            handleOpen={handleOpen}
+            setImageSource={setImageSource}
+            sourcePlayback={sourcePlayback}
+            backgroundConfig={props.backgroundConfig}
+            segmentationConfig={props.segmentationConfig}
+            postProcessingConfig={props.postProcessingConfig}
+            bodyPix={props.bodyPix}
+            tflite={props.tflite}
+          />
+        </>
       ) : (
         <div className={classes.noOutput}>
           <Avatar className={classes.avatar} />
@@ -73,6 +117,48 @@ const useStyles = makeStyles((theme: Theme) => {
       //   gridRowStart: 1,
       //   gridRowEnd: 3,
       // },
+    },
+    modal: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: '0.5rem',
+      padding: theme.spacing(1),
+      backgroundColor: theme.palette.background.paper,
+      position: 'relative',
+    },
+    iconButtonClose: {
+      position: 'absolute',
+      // width : w
+      fontSize: 40,
+      right: theme.spacing(1),
+      top: theme.spacing(1),
+      color: theme.palette.grey[100],
+      zIndex: 1,
+    },
+    iconButtonShare: {
+      position: 'absolute',
+      // width : w
+      fontSize: 40,
+      right: theme.spacing(1),
+      bottom: theme.spacing(10),
+      color: theme.palette.grey[100],
+      zIndex: 1,
+    },
+    iconButtonSave: {
+      position: 'absolute',
+      // width : w
+      fontSize: 40,
+      right: theme.spacing(1),
+      bottom: theme.spacing(1),
+      color: theme.palette.grey[100],
+      zIndex: 1,
+    },
+    imageShot: {
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+      transform: 'scaleX(-1)',
     },
     noOutput: {
       flex: 1,

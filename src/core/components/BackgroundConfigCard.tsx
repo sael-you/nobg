@@ -3,12 +3,18 @@ import CardContent from '@material-ui/core/CardContent'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import BlockIcon from '@material-ui/icons/Block'
 import BlurOnIcon from '@material-ui/icons/BlurOn'
+import { Swiper, SwiperSlide } from 'swiper/react'
 import ImageButton from '../../shared/components/ImageButton'
 import SelectionIconButton from '../../shared/components/SelectionIconButton'
 import {
   BackgroundConfig,
-  backgroundImageUrls
+  backgroundImageUrls,
 } from '../helpers/backgroundHelper'
+import 'swiper/css'
+import 'swiper/css/navigation'
+import 'swiper/css/pagination'
+import { Navigation, Pagination } from 'swiper'
+import { useCallback, useEffect, useRef } from 'react'
 
 type BackgroundConfigCardProps = {
   config: BackgroundConfig
@@ -17,47 +23,96 @@ type BackgroundConfigCardProps = {
 
 function BackgroundConfigCard(props: BackgroundConfigCardProps) {
   const classes = useStyles()
+  const swiperRef = useRef<any>()
 
+  // Center the clicked slide
+  const handleClick = useCallback((swiper: any) => {
+    const clickedSlideIndex = swiper.clickedIndex
+    swiper.slideTo(clickedSlideIndex)
+  }, [])
+
+  useEffect(() => {
+    // Update the swiper instance when the component mounts
+    swiperRef.current?.update()
+  }, [])
   return (
-    <Card className={classes.root}>
-      <CardContent>
-        {/* <Typography gutterBottom variant="h6" component="h2">
-          Background
-        </Typography> */}
-        <SelectionIconButton
-          active={props.config.type === 'none'}
-          onClick={() => props.onChange({ type: 'none' })}
-        >
-          <BlockIcon />
-        </SelectionIconButton>
-        <SelectionIconButton
-          active={props.config.type === 'blur'}
-          onClick={() => props.onChange({ type: 'blur' })}
-        >
-          <BlurOnIcon />
-        </SelectionIconButton>
+    <div className={classes.root}>
+      <Swiper
+        modules={[Navigation, Pagination]}
+        navigation
+        slidesPerView={1}
+        spaceBetween={10}
+        breakpoints={{
+          640: {
+            slidesPerView: 11,
+            spaceBetween: 20,
+          },
+          768: {
+            slidesPerView: 14,
+            spaceBetween: 40,
+          },
+          1024: {
+            slidesPerView: 18,
+            spaceBetween: 50,
+          },
+        }}
+        centeredSlides={true}
+        // pagination={{ clickable: true }}
+        initialSlide={2}
+        onSwiper={(swiper) => {
+          // Save the swiper instance to the ref
+          swiperRef.current = swiper
+        }}
+        onClick={(swiper) => handleClick(swiper)}
+        className={classes.slider}
+      >
+        <SwiperSlide>
+          <SelectionIconButton
+            active={props.config.type === 'none'}
+            onClick={() => props.onChange({ type: 'none' })}
+          >
+            <BlockIcon />
+          </SelectionIconButton>
+        </SwiperSlide>
+        <SwiperSlide>
+          <SelectionIconButton
+            active={props.config.type === 'blur'}
+            onClick={() => props.onChange({ type: 'blur' })}
+          >
+            <BlurOnIcon />
+          </SelectionIconButton>
+        </SwiperSlide>
         {backgroundImageUrls.map((imageUrl) => (
-          <ImageButton
-            key={imageUrl}
-            imageUrl={imageUrl}
-            active={imageUrl === props.config.url}
-            onClick={() => props.onChange({ type: 'image', url: imageUrl })}
-          />
+          <SwiperSlide key={imageUrl}>
+            <ImageButton
+              imageUrl={imageUrl}
+              active={imageUrl === props.config.url}
+              onClick={() => props.onChange({ type: 'image', url: imageUrl })}
+            />
+          </SwiperSlide>
         ))}
-      </CardContent>
-    </Card>
+      </Swiper>
+    </div>
   )
 }
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      flex: 1,
+      // flex: 1,
+      width: '100%',
       position: 'absolute',
       top: '80%',
-      left: '38%',
+      // left: '38%',
+      display: 'flex',
+      jusifyContent: 'center',
       backgroundColor: '#ffffff00',
-      boxShadow: '0px 2px 1px -1px rgb(0 0 0 / 0%), 0px 0px 1px 0px rgb(0 0 0 / 0%), 0px 0px 0px 0px rgb(0 0 0 / 0%)',
+      boxShadow:
+        '0px 2px 1px -1px rgb(0 0 0 / 0%), 0px 0px 1px 0px rgb(0 0 0 / 0%), 0px 0px 0px 0px rgb(0 0 0 / 0%)',
+    },
+    slider: {
+      // flex: 1,
+      width: '100%',
     },
   })
 )

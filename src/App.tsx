@@ -63,10 +63,10 @@ function App() {
         tflite={tflite}
       />
       {/* <SourceConfigCard config={sourceConfig} onChange={setSourceConfig} /> */}
-      {/* <BackgroundConfigCard
+      <BackgroundConfigCard
         config={backgroundConfig}
         onChange={setBackgroundConfig}
-      /> */}
+      />
        {/* <SegmentationConfigCard
         config={segmentationConfig}
         isSIMDSupported={isSIMDSupported}
