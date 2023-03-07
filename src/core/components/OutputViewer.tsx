@@ -117,8 +117,8 @@ function OutputViewer(props: OutputViewerProps) {
 
       const startRecording = () => {
         stream = canvas.captureStream()
-        button.textContent = 'Recording'
-        mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/mp4' })
+        // button.textContent = 'Recording'
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' })
         mediaRecorder.ondataavailable = (e) => {
           chunks.push(e.data)
         }
@@ -130,13 +130,15 @@ function OutputViewer(props: OutputViewerProps) {
           chunks = []
 
           /**ONLY TO TEST THE VIDEO */
-          const video = document.createElement('video')
-          video.src = url
-          video.style.position = 'absolute'
-          video.style.top = '50%'
-          video.controls = true
-          document.body.appendChild(video)
-          console.log(video)
+          // const video = document.createElement('video')
+          // video.src = url
+          // video.style.position = 'absolute'
+          // video.style.top = '50%'
+          // video.controls = true
+          // document.body.appendChild(video)
+          props.setImageSource(url)
+          props.handleOpen()
+          // console.log(video)
           /**------------------------- */
         }
         mediaRecorder.start()

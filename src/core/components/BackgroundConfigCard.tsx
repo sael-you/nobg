@@ -42,6 +42,7 @@ function BackgroundConfigCard(props: BackgroundConfigCardProps) {
         navigation
         slidesPerView={1}
         spaceBetween={10}
+        ref={swiperRef}
         breakpoints={{
           320: {
             slidesPerView: 4,
@@ -68,9 +69,7 @@ function BackgroundConfigCard(props: BackgroundConfigCardProps) {
             spaceBetween: 50,
           },
         }}
-        loop
         centeredSlides={true}
-        // pagination={{ clickable: true }}
         initialSlide={2}
         onSwiper={(swiper) => {
           // Save the swiper instance to the ref

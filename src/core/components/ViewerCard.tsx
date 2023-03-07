@@ -11,7 +11,12 @@ import { SourceConfig, SourcePlayback } from '../helpers/sourceHelper'
 import { TFLite } from '../hooks/useTFLite'
 import OutputViewer from './OutputViewer'
 import SourceViewer from './SourceViewer'
-import { CloseOutlined, CloudDownloadOutlined, FontDownloadOutlined, ShareOutlined } from '@material-ui/icons'
+import {
+  CloseOutlined,
+  CloudDownloadOutlined,
+  FontDownloadOutlined,
+  ShareOutlined,
+} from '@material-ui/icons'
 
 type ViewerCardProps = {
   sourceConfig: SourceConfig
@@ -75,7 +80,15 @@ function ViewerCard(props: ViewerCardProps) {
               >
                 <CloudDownloadOutlined style={{ fontSize: 40 }} />
               </IconButton>
-              <img src={ImageSource} className={classes.imageShot} alt="shot" />
+              {ImageSource.includes('base') ? (
+                <img
+                  src={ImageSource}
+                  className={classes.imageShot}
+                  alt="shot"
+                />
+              ) : (
+                <video src={ImageSource} controls />
+              )}
             </div>
           </Modal>
           <OutputViewer
@@ -160,6 +173,11 @@ const useStyles = makeStyles((theme: Theme) => {
       objectFit: 'cover',
       transform: 'scaleX(-1)',
     },
+    // videoShot: {
+    //   transform: 'rotateY(180deg)',
+    //   '-webkit-transform': 'rotateY(180deg)' /* Safari and Chrome */,
+    //   '-moz-transform': 'rotateY(180deg)' /* Firefox */,
+    // },
     noOutput: {
       flex: 1,
       display: 'flex',
