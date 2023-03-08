@@ -3,8 +3,7 @@ import { useEffect, useState } from 'react'
 import BackgroundConfigCard from './core/components/BackgroundConfigCard'
 import ViewerCard from './core/components/ViewerCard'
 import {
-  BackgroundConfig,
-  backgroundImageUrls
+  BackgroundConfig
 } from './core/helpers/backgroundHelper'
 import { PostProcessingConfig } from './core/helpers/postProcessingHelper'
 import { SegmentationConfig } from './core/helpers/segmentationHelper'
@@ -19,8 +18,7 @@ function App() {
     url: sourceImageUrls[0],
   })
   const [backgroundConfig, setBackgroundConfig] = useState<BackgroundConfig>({
-    type: 'image',
-    url: backgroundImageUrls[0],
+    type: 'blur',
   })
   const [segmentationConfig, setSegmentationConfig] =
     useState<SegmentationConfig>({

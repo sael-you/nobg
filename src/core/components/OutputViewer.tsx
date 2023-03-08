@@ -1,10 +1,7 @@
 import { IconButton } from '@material-ui/core'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import {
-  CameraAlt,
-  CameraAltOutlined,
-  CameraAltRounded,
-  CameraAltTwoTone,
+  CameraAltTwoTone
 } from '@material-ui/icons'
 import { BodyPix } from '@tensorflow-models/body-pix'
 import { useEffect } from 'react'
@@ -53,16 +50,22 @@ function OutputViewer(props: OutputViewerProps) {
     //   console.log('Screenshot taken:', hdDataURL);
     // });
 
-    const button = document.getElementById('screenshot')!
+    const button = document.getElementById('screenshot') as HTMLButtonElement
     const canvas = document.getElementById('testCanvas') as HTMLCanvasElement
 
-    button.addEventListener('mousedown', (e) => {
+    button.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
+      e.preventDefault(); // add this line
+
+
+      let screenshotTaken = false;
       let record = false
       let stream: MediaStream
       let mediaRecorder: MediaRecorder
       let chunks: Blob[] = []
       let start: number
       let requestId: number
+
 
       const gl = canvas.getContext('webgl2')!
       const pixels = new Uint8Array(canvas.width * canvas.height * 4)
@@ -100,10 +103,10 @@ function OutputViewer(props: OutputViewerProps) {
       const tmpContext = tmpCanvas.getContext('2d')!
       tmpContext.putImageData(imageData, 0, 0)
       // const dataURLee = tmpCanvas.toDataURL();
-
+      const devicePixelRatio = window.devicePixelRatio || 1
       const hdCanvas = document.createElement('canvas')
-      hdCanvas.width = canvas.width * window.devicePixelRatio
-      hdCanvas.height = canvas.height * window.devicePixelRatio
+      hdCanvas.width = canvas.width * devicePixelRatio
+      hdCanvas.height = canvas.height * devicePixelRatio
       const hdContext = hdCanvas.getContext('2d')!
       // hdContext.scale(window.devicePixelRatio, window.devicePixelRatio);
       hdContext.drawImage(tmpCanvas, 0, 0, hdCanvas.width, hdCanvas.height)
@@ -113,6 +116,7 @@ function OutputViewer(props: OutputViewerProps) {
         props.setImageSource(dataURL)
         props.handleOpen()
         console.log('Screenshot taken:', dataURL)
+        screenshotTaken = true;
       }
 
       const startRecording = () => {
@@ -123,7 +127,7 @@ function OutputViewer(props: OutputViewerProps) {
           chunks.push(e.data)
         }
         mediaRecorder.onstop = () => {
-          const blob = new Blob(chunks, { type: 'video/mp4' })
+          const blob = new Blob(chunks, { type: 'video/webm' })
           console.log(blob)
           const url = URL.createObjectURL(blob)
           console.log('Video recording stopped:', url)
@@ -156,7 +160,7 @@ function OutputViewer(props: OutputViewerProps) {
       const drawFrame = () => {
         tmpContext.drawImage(canvas, 0, 0)
         const now = performance.now()
-        if (now - start >= 60000) {
+        if (now - start >= 20000) {
           // Stop recording after 10 seconds
           stopRecording()
         } else {
@@ -169,17 +173,21 @@ function OutputViewer(props: OutputViewerProps) {
         startRecording()
       }, 500)
 
-      const mouseupHandler = () => {
+      const mouseupHandler = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
         clearTimeout(longPressTimeoutId)
         if (record) {
           stopRecording()
         } else {
-          takeScreenshot()
+          if (!screenshotTaken)
+            takeScreenshot()
         }
-        document.removeEventListener('mouseup', mouseupHandler)
+        document.removeEventListener('touchend', mouseupHandler)
       }
-      document.addEventListener('mouseup', mouseupHandler)
-    })
+      document.addEventListener('touchend', mouseupHandler,);
+    }, { capture: true })
+
 
     if (pipeline) {
       pipeline.updatePostProcessingConfig(props.postProcessingConfig)
