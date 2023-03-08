@@ -1,4 +1,4 @@
-import { IconButton, Modal } from '@material-ui/core'
+import { IconButton, Modal, useMediaQuery } from '@material-ui/core'
 import Avatar from '@material-ui/core/Avatar'
 import Paper from '@material-ui/core/Paper'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
@@ -37,7 +37,7 @@ function ViewerCard(props: ViewerCardProps) {
     const link = document.createElement('a');
     link.href = imageSource;
     const timestamp = new Date().getTime().toString();
-    const extension = isVideo ? 'mp4' : 'png'; 
+    const extension = isVideo ? 'mp4' : 'png';
     const filename = `Kaviar-${timestamp}.${extension}`;
     link.download = filename;
 
@@ -49,7 +49,7 @@ function ViewerCard(props: ViewerCardProps) {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
       const timestamp = new Date().getTime().toString();
-      const extension = isVideo ? 'mp4' : 'png'; 
+      const extension = isVideo ? 'mp4' : 'png';
       const type = isVideo ? 'video/mp4' : 'image/png';
       const filename = `Kaviar-${timestamp}.${extension}`;
       const file = new File([blob], filename, { type: type });
@@ -65,6 +65,8 @@ function ViewerCard(props: ViewerCardProps) {
       console.error('Error sharing image:', error);
     }
   };
+
+  const isDesktop = useMediaQuery('(min-width:960px)');
 
   const [ImageSource, setImageSource] = useState('')
   useEffect(() => {
@@ -101,12 +103,14 @@ function ViewerCard(props: ViewerCardProps) {
               >
                 <CloseOutlined style={{ fontSize: 40 }} />
               </IconButton>
-              <IconButton
-                className={classes.iconButtonShare}
-                onClick={() => handleShare(ImageSource)}
-              >
-                <ShareOutlined style={{ fontSize: 40 }} />
-              </IconButton>
+              {isDesktop ? null : (
+                <IconButton
+                  className={classes.iconButtonShare}
+                  onClick={() => handleShare(ImageSource)}
+                >
+                  <ShareOutlined style={{ fontSize: 40 }} />
+                </IconButton>
+              )}
               <IconButton
                 className={classes.iconButtonSave}
                 onClick={() => handleSave(ImageSource)}
@@ -122,7 +126,7 @@ function ViewerCard(props: ViewerCardProps) {
                 />
               ) : (
                 isVideo = true,
-                <video src={ImageSource} controls={false} autoPlay={true} loop={true}/>
+                <video src={ImageSource} controls={false} autoPlay={true} loop={true} />
               )}
             </div>
           </Modal>

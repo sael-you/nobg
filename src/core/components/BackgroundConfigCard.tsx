@@ -1,20 +1,18 @@
-import Card from '@material-ui/core/Card'
-import CardContent from '@material-ui/core/CardContent'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import BlockIcon from '@material-ui/icons/Block'
 import BlurOnIcon from '@material-ui/icons/BlurOn'
+import { useCallback, useEffect, useRef } from 'react'
+import { Navigation, Pagination } from 'swiper'
+import 'swiper/css'
+import 'swiper/css/navigation'
+import 'swiper/css/pagination'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import ImageButton from '../../shared/components/ImageButton'
 import SelectionIconButton from '../../shared/components/SelectionIconButton'
 import {
   BackgroundConfig,
-  backgroundImageUrls,
+  backgroundImageUrls
 } from '../helpers/backgroundHelper'
-import 'swiper/css'
-import 'swiper/css/navigation'
-import 'swiper/css/pagination'
-import { Navigation, Pagination } from 'swiper'
-import { useCallback, useEffect, useRef } from 'react'
 
 type BackgroundConfigCardProps = {
   config: BackgroundConfig
@@ -39,7 +37,7 @@ function BackgroundConfigCard(props: BackgroundConfigCardProps) {
     <div className={classes.root}>
       <Swiper
         modules={[Navigation, Pagination]}
-        navigation
+        navigation={false}
         slidesPerView={1}
         spaceBetween={10}
         ref={swiperRef}
@@ -70,7 +68,7 @@ function BackgroundConfigCard(props: BackgroundConfigCardProps) {
           },
         }}
         centeredSlides={true}
-        initialSlide={2}
+        initialSlide={1}
         onSwiper={(swiper) => {
           // Save the swiper instance to the ref
           swiperRef.current = swiper

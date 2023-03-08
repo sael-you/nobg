@@ -65,7 +65,7 @@ function App() {
         config={backgroundConfig}
         onChange={setBackgroundConfig}
       />
-       {/* <SegmentationConfigCard
+      {/* <SegmentationConfigCard
         config={segmentationConfig}
         isSIMDSupported={isSIMDSupported}
         onChange={setSegmentationConfig}
@@ -84,7 +84,8 @@ const useStyles = makeStyles((theme: Theme) =>
     root: {
       display: 'block',
       width: '100vw',
-      height: '100vh',
+      height: '100%',
+      overflow: 'hidden',
 
       // [theme.breakpoints.up('xs')]: {
       //   margin: theme.spacing(1),

@@ -30,7 +30,7 @@ function SourceViewer(props: SourceViewerProps) {
   useEffect(() => {
     async function getCameraStream() {
       try {
-        const constraint = { video: { facingMode: "user" }}
+        const constraint = { video: { facingMode: "user" } }
         const stream = await navigator.mediaDevices.getUserMedia(constraint)
         if (videoRef.current) {
           videoRef.current.srcObject = stream
@@ -50,7 +50,7 @@ function SourceViewer(props: SourceViewerProps) {
     }
   }, [props.sourceConfig])
 
-  
+
 
   function handleImageLoad(event: SyntheticEvent) {
     const image = event.target as HTMLImageElement
@@ -106,10 +106,10 @@ function SourceViewer(props: SourceViewerProps) {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      position: 'relative',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
+      // position: 'relative',
+      // display: 'flex',
+      // justifyContent: 'center',
+      // alignItems: 'center',
 
       [theme.breakpoints.down('xs')]: {
         width: 0,

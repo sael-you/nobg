@@ -49,144 +49,283 @@ function OutputViewer(props: OutputViewerProps) {
 
     //   console.log('Screenshot taken:', hdDataURL);
     // });
+    const isTouchDevice = 'ontouchstart' in window;
 
     const button = document.getElementById('screenshot') as HTMLButtonElement
     const canvas = document.getElementById('testCanvas') as HTMLCanvasElement
 
-    button.addEventListener('touchstart', (e) => {
-      e.stopPropagation();
-      e.preventDefault(); // add this line
+    if (isTouchDevice) {
+      button.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+        e.preventDefault(); // add this line
 
 
-      let screenshotTaken = false;
-      let record = false
-      let stream: MediaStream
-      let mediaRecorder: MediaRecorder
-      let chunks: Blob[] = []
-      let start: number
-      let requestId: number
+        let screenshotTaken = false;
+        let record = false
+        let stream: MediaStream
+        let mediaRecorder: MediaRecorder
+        let chunks: Blob[] = []
+        let start: number
+        let requestId: number
 
 
-      const gl = canvas.getContext('webgl2')!
-      const pixels = new Uint8Array(canvas.width * canvas.height * 4)
-      gl.readPixels(
-        0,
-        0,
-        canvas.width,
-        canvas.height,
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        pixels
-      )
-      const flippedPixels = new Uint8ClampedArray(
-        canvas.width * canvas.height * 4
-      )
-      for (let y = 0; y < canvas.height; y++) {
-        const i = y * canvas.width * 4
-        const flip_i = (canvas.height - y - 1) * canvas.width * 4
-        for (let x = 0; x < canvas.width; x++) {
-          flippedPixels[flip_i + x * 4] = pixels[i + x * 4]
-          flippedPixels[flip_i + x * 4 + 1] = pixels[i + x * 4 + 1]
-          flippedPixels[flip_i + x * 4 + 2] = pixels[i + x * 4 + 2]
-          flippedPixels[flip_i + x * 4 + 3] = pixels[i + x * 4 + 3]
+        const gl = canvas.getContext('webgl2')!
+        const pixels = new Uint8Array(canvas.width * canvas.height * 4)
+        gl.readPixels(
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          pixels
+        )
+        const flippedPixels = new Uint8ClampedArray(
+          canvas.width * canvas.height * 4
+        )
+        for (let y = 0; y < canvas.height; y++) {
+          const i = y * canvas.width * 4
+          const flip_i = (canvas.height - y - 1) * canvas.width * 4
+          for (let x = 0; x < canvas.width; x++) {
+            flippedPixels[flip_i + x * 4] = pixels[i + x * 4]
+            flippedPixels[flip_i + x * 4 + 1] = pixels[i + x * 4 + 1]
+            flippedPixels[flip_i + x * 4 + 2] = pixels[i + x * 4 + 2]
+            flippedPixels[flip_i + x * 4 + 3] = pixels[i + x * 4 + 3]
+          }
         }
-      }
 
-      const imageData = new ImageData(
-        flippedPixels,
-        canvas.width,
-        canvas.height
-      )
-      const tmpCanvas = document.createElement('canvas')
-      tmpCanvas.width = canvas.width
-      tmpCanvas.height = canvas.height
-      const tmpContext = tmpCanvas.getContext('2d')!
-      tmpContext.putImageData(imageData, 0, 0)
-      // const dataURLee = tmpCanvas.toDataURL();
-      const devicePixelRatio = window.devicePixelRatio || 1
-      const hdCanvas = document.createElement('canvas')
-      hdCanvas.width = canvas.width * devicePixelRatio
-      hdCanvas.height = canvas.height * devicePixelRatio
-      const hdContext = hdCanvas.getContext('2d')!
-      // hdContext.scale(window.devicePixelRatio, window.devicePixelRatio);
-      hdContext.drawImage(tmpCanvas, 0, 0, hdCanvas.width, hdCanvas.height)
+        const imageData = new ImageData(
+          flippedPixels,
+          canvas.width,
+          canvas.height
+        )
+        const tmpCanvas = document.createElement('canvas')
+        tmpCanvas.width = canvas.width
+        tmpCanvas.height = canvas.height
+        const tmpContext = tmpCanvas.getContext('2d')!
+        tmpContext.putImageData(imageData, 0, 0)
+        // const dataURLee = tmpCanvas.toDataURL();
+        // const devicePixelRatio = window.devicePixelRatio || 1
+        const hdCanvas = document.createElement('canvas')
+        hdCanvas.width = canvas.width * devicePixelRatio
+        hdCanvas.height = canvas.height * devicePixelRatio
+        const hdContext = hdCanvas.getContext('2d')!
+        // hdContext.scale(window.devicePixelRatio, window.devicePixelRatio);
+        hdContext.drawImage(tmpCanvas, 0, 0, hdCanvas.width, hdCanvas.height)
 
-      const takeScreenshot = () => {
-        const dataURL = hdCanvas.toDataURL()
-        props.setImageSource(dataURL)
-        props.handleOpen()
-        console.log('Screenshot taken:', dataURL)
-        screenshotTaken = true;
-      }
-
-      const startRecording = () => {
-        stream = canvas.captureStream()
-        // button.textContent = 'Recording'
-        mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' })
-        mediaRecorder.ondataavailable = (e) => {
-          chunks.push(e.data)
-        }
-        mediaRecorder.onstop = () => {
-          const blob = new Blob(chunks, { type: 'video/webm' })
-          console.log(blob)
-          const url = URL.createObjectURL(blob)
-          console.log('Video recording stopped:', url)
-          chunks = []
-
-          /**ONLY TO TEST THE VIDEO */
-          // const video = document.createElement('video')
-          // video.src = url
-          // video.style.position = 'absolute'
-          // video.style.top = '50%'
-          // video.controls = true
-          // document.body.appendChild(video)
-          props.setImageSource(url)
+        const takeScreenshot = () => {
+          const dataURL = hdCanvas.toDataURL()
+          props.setImageSource(dataURL)
           props.handleOpen()
-          // console.log(video)
-          /**------------------------- */
+          // console.log('Screenshot taken:', dataURL)
+          screenshotTaken = true;
         }
-        mediaRecorder.start()
-        start = performance.now()
-        requestId = requestAnimationFrame(drawFrame)
-      }
 
-      const stopRecording = () => {
-        button.textContent = ''
-        mediaRecorder.stop()
-        cancelAnimationFrame(requestId)
-        console.log('Video recording stopped.')
-      }
+        const startRecording = () => {
+          stream = canvas.captureStream()
+          // button.textContent = 'Recording'
+          mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' })
+          mediaRecorder.ondataavailable = (e) => {
+            chunks.push(e.data)
+          }
+          mediaRecorder.onstop = () => {
+            const blob = new Blob(chunks, { type: 'video/webm' })
+            console.log(blob)
+            const url = URL.createObjectURL(blob)
+            // console.log('Video recording stopped:', url)
+            chunks = []
 
-      const drawFrame = () => {
-        tmpContext.drawImage(canvas, 0, 0)
-        const now = performance.now()
-        if (now - start >= 20000) {
-          // Stop recording after 10 seconds
-          stopRecording()
-        } else {
+            /**ONLY TO TEST THE VIDEO */
+            // const video = document.createElement('video')
+            // video.src = url
+            // video.style.position = 'absolute'
+            // video.style.top = '50%'
+            // video.controls = true
+            // document.body.appendChild(video)
+            props.setImageSource(url)
+            props.handleOpen()
+            // console.log(video)
+            /**------------------------- */
+          }
+          mediaRecorder.start()
+          start = performance.now()
           requestId = requestAnimationFrame(drawFrame)
         }
-      }
 
-      const longPressTimeoutId = setTimeout(() => {
-        record = true
-        startRecording()
-      }, 500)
-
-      const mouseupHandler = (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        clearTimeout(longPressTimeoutId)
-        if (record) {
-          stopRecording()
-        } else {
-          if (!screenshotTaken)
-            takeScreenshot()
+        const stopRecording = () => {
+          // button.textContent = ''
+          mediaRecorder.stop()
+          cancelAnimationFrame(requestId)
+          console.log('Video recording stopped.')
         }
-        document.removeEventListener('touchend', mouseupHandler)
-      }
-      document.addEventListener('touchend', mouseupHandler,);
-    }, { capture: true })
+
+        const drawFrame = () => {
+          tmpContext.drawImage(canvas, 0, 0)
+          const now = performance.now()
+          if (now - start >= 20000) {
+            // Stop recording after 10 seconds
+            stopRecording()
+          } else {
+            requestId = requestAnimationFrame(drawFrame)
+          }
+        }
+
+        const longPressTimeoutId = setTimeout(() => {
+          record = true
+          startRecording()
+        }, 500)
+
+        const mouseupHandler = (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          clearTimeout(longPressTimeoutId)
+          if (record) {
+            stopRecording()
+          } else {
+            if (!screenshotTaken)
+              takeScreenshot()
+          }
+          document.removeEventListener('touchend', mouseupHandler)
+        }
+        document.addEventListener('touchend', mouseupHandler,);
+      }, { capture: true })
+    } else {
+      button.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        e.preventDefault(); // add this line
+
+
+        let screenshotTaken = false;
+        let record = false
+        let stream: MediaStream
+        let mediaRecorder: MediaRecorder
+        let chunks: Blob[] = []
+        let start: number
+        let requestId: number
+
+
+        const gl = canvas.getContext('webgl2')!
+        const pixels = new Uint8Array(canvas.width * canvas.height * 4)
+        gl.readPixels(
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          pixels
+        )
+        const flippedPixels = new Uint8ClampedArray(
+          canvas.width * canvas.height * 4
+        )
+        for (let y = 0; y < canvas.height; y++) {
+          const i = y * canvas.width * 4
+          const flip_i = (canvas.height - y - 1) * canvas.width * 4
+          for (let x = 0; x < canvas.width; x++) {
+            flippedPixels[flip_i + x * 4] = pixels[i + x * 4]
+            flippedPixels[flip_i + x * 4 + 1] = pixels[i + x * 4 + 1]
+            flippedPixels[flip_i + x * 4 + 2] = pixels[i + x * 4 + 2]
+            flippedPixels[flip_i + x * 4 + 3] = pixels[i + x * 4 + 3]
+          }
+        }
+
+        const imageData = new ImageData(
+          flippedPixels,
+          canvas.width,
+          canvas.height
+        )
+        const tmpCanvas = document.createElement('canvas')
+        tmpCanvas.width = canvas.width
+        tmpCanvas.height = canvas.height
+        const tmpContext = tmpCanvas.getContext('2d')!
+        tmpContext.putImageData(imageData, 0, 0)
+        // const dataURLee = tmpCanvas.toDataURL();
+        // const devicePixelRatio = window.devicePixelRatio || 1
+        const hdCanvas = document.createElement('canvas')
+        hdCanvas.width = canvas.width * devicePixelRatio
+        hdCanvas.height = canvas.height * devicePixelRatio
+        const hdContext = hdCanvas.getContext('2d')!
+        // hdContext.scale(window.devicePixelRatio, window.devicePixelRatio);
+        hdContext.drawImage(tmpCanvas, 0, 0, hdCanvas.width, hdCanvas.height)
+
+        const takeScreenshot = () => {
+          const dataURL = hdCanvas.toDataURL()
+          props.setImageSource(dataURL)
+          props.handleOpen()
+          // console.log('Screenshot taken:', dataURL)
+          screenshotTaken = true;
+        }
+
+        const startRecording = () => {
+          stream = canvas.captureStream()
+          // button.textContent = 'Recording'
+          mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' })
+          mediaRecorder.ondataavailable = (e) => {
+            chunks.push(e.data)
+          }
+          mediaRecorder.onstop = () => {
+            const blob = new Blob(chunks, { type: 'video/webm' })
+            console.log(blob)
+            const url = URL.createObjectURL(blob)
+            // console.log('Video recording stopped:', url)
+            chunks = []
+
+            /**ONLY TO TEST THE VIDEO */
+            // const video = document.createElement('video')
+            // video.src = url
+            // video.style.position = 'absolute'
+            // video.style.top = '50%'
+            // video.controls = true
+            // document.body.appendChild(video)
+            props.setImageSource(url)
+            props.handleOpen()
+            // console.log(video)
+            /**------------------------- */
+          }
+          mediaRecorder.start()
+          start = performance.now()
+          requestId = requestAnimationFrame(drawFrame)
+        }
+
+        const stopRecording = () => {
+          // button.textContent = ''
+          mediaRecorder.stop()
+          cancelAnimationFrame(requestId)
+          console.log('Video recording stopped.')
+        }
+
+        const drawFrame = () => {
+          tmpContext.drawImage(canvas, 0, 0)
+          const now = performance.now()
+          if (now - start >= 20000) {
+            // Stop recording after 10 seconds
+            stopRecording()
+          } else {
+            requestId = requestAnimationFrame(drawFrame)
+          }
+        }
+
+        const longPressTimeoutId = setTimeout(() => {
+          record = true
+          startRecording()
+        }, 500)
+
+        const mouseupHandler = (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          clearTimeout(longPressTimeoutId)
+          if (record) {
+            stopRecording()
+          } else {
+            if (!screenshotTaken)
+              takeScreenshot()
+          }
+          document.removeEventListener('mouseup', mouseupHandler)
+        }
+        document.addEventListener('mouseup', mouseupHandler,);
+      }, { capture: true })
+    }
+
 
 
     if (pipeline) {
@@ -203,31 +342,34 @@ function OutputViewer(props: OutputViewerProps) {
 
   return (
     <div className={classes.root}>
-      {props.backgroundConfig.type === 'image' && (
-        <img
-          ref={backgroundImageRef}
+      <div className={classes.wrapper}> {/* new wrapper element */}
+
+        {props.backgroundConfig.type === 'image' && (
+          <img
+            ref={backgroundImageRef}
+            className={classes.render}
+            src={props.backgroundConfig.url}
+            alt=""
+            hidden={props.segmentationConfig.pipeline === 'webgl2'}
+          />
+        )}
+        <canvas
+          id="testCanvas"
+          // The key attribute is required to create a new canvas when switching
+          // context mode
+          key={props.segmentationConfig.pipeline}
+          ref={canvasRef}
           className={classes.render}
-          src={props.backgroundConfig.url}
-          alt=""
-          hidden={props.segmentationConfig.pipeline === 'webgl2'}
+          width={props.sourcePlayback.width}
+          height={props.sourcePlayback.height}
         />
-      )}
-      <canvas
-        id="testCanvas"
-        // The key attribute is required to create a new canvas when switching
-        // context mode
-        key={props.segmentationConfig.pipeline}
-        ref={canvasRef}
-        className={classes.render}
-        width={props.sourcePlayback.width}
-        height={props.sourcePlayback.height}
-      />
-      <IconButton className={classes.button} id="screenshot">
-        <CameraAltTwoTone style={{ fontSize: 32 }} />
-      </IconButton>
-      {/* <Typography className={classes.stats} variant="caption">
+        <IconButton className={classes.button} id="screenshot">
+          <CameraAltTwoTone style={{ fontSize: 32 }} />
+        </IconButton>
+        {/* <Typography className={classes.stats} variant="caption">
         {stats}
       </Typography> */}
+      </div>
     </div>
   )
 }
@@ -235,8 +377,9 @@ function OutputViewer(props: OutputViewerProps) {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     button: {
+      touchAction: 'manipulation', // enclosed in quotes
       position: 'absolute',
-      top: '93.5%',
+      top: '95%', // enclosed in quotes
       left: '50%',
       backgroundColor: theme.palette.primary.main,
       color: theme.palette.getContrastText(theme.palette.primary.main),
@@ -249,11 +392,16 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     root: {
       flex: 1,
-      position: 'relative',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      // overflow: 'hidden',
       transform: 'scaleX(-1)',
+
     },
     render: {
-      position: 'absolute',
       width: '100%',
       height: '100%',
       objectFit: 'cover',
@@ -267,6 +415,12 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: 'rgba(0, 0, 0, 0.48)',
       color: theme.palette.common.white,
     },
+    wrapper: { // new wrapper element styles
+      position: 'relative',
+      width: '100%',
+      height: '100%',
+      overflow: 'hidden',
+    }
   })
 )
 
