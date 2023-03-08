@@ -7,6 +7,7 @@ import {
   CloudDownloadOutlined, ShareOutlined
 } from '@material-ui/icons'
 import { BodyPix } from '@tensorflow-models/body-pix'
+import download from 'downloadjs'
 import { useEffect, useState } from 'react'
 import { BackgroundConfig } from '../helpers/backgroundHelper'
 import { PostProcessingConfig } from '../helpers/postProcessingHelper'
@@ -32,18 +33,29 @@ function ViewerCard(props: ViewerCardProps) {
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
   let isVideo: Boolean;
+  // const handleSave = (imageSource: string) => {
+  //   const timestamp = new Date().getTime().toString();
+  //   const extension = isVideo ? 'mp4' : 'png';
+  //   const filename = `Kaviar-${timestamp}.${extension}`;
+  //   const link = document.createElement('a');
+  //   link.href = imageSource;
+  //   link.download = filename;
+  //   link.setAttribute('target', '_blank');
+  //   document.body.appendChild(link);
+  //   link.click();
+  //   document.body.removeChild(link);
+  // };
   const handleSave = (imageSource: string) => {
-    // Create a temporary link element
-    const link = document.createElement('a');
-    link.href = imageSource;
     const timestamp = new Date().getTime().toString();
     const extension = isVideo ? 'mp4' : 'png';
     const filename = `Kaviar-${timestamp}.${extension}`;
-    link.download = filename;
+    fetch(imageSource)
+      .then(response => response.blob())
+      .then(blob => {
+        download(blob, filename);
+      });
+  };
 
-    // Simulate a click on the link to trigger the download
-    link.click();
-  }
   const handleShare = async (imageUrl) => {
     try {
       const response = await fetch(imageUrl);
@@ -67,6 +79,7 @@ function ViewerCard(props: ViewerCardProps) {
   };
 
   const isDesktop = useMediaQuery('(min-width:960px)');
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 
   const [ImageSource, setImageSource] = useState('')
   useEffect(() => {
@@ -126,7 +139,7 @@ function ViewerCard(props: ViewerCardProps) {
                 />
               ) : (
                 isVideo = true,
-                <video src={ImageSource} controls={false} autoPlay={true} loop={true} />
+                <video className={classes.videoShot} src={ImageSource} controls={isIOS} autoPlay={true} loop={true} />
               )}
             </div>
           </Modal>
@@ -210,7 +223,10 @@ const useStyles = makeStyles((theme: Theme) => {
       width: '100%',
       height: '100%',
       objectFit: 'cover',
-      transform: 'scaleX(-1)',
+      // transform: 'scaleX(-1)',
+    },
+    videoShot: {
+      width: '90vw',
     },
     // videoShot: {
     //   transform: 'rotateY(180deg)',
