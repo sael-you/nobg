@@ -1,3 +1,4 @@
+import { Grid, useMediaQuery } from '@material-ui/core'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import { useEffect, useState } from 'react'
 import BackgroundConfigCard from './core/components/BackgroundConfigCard'
@@ -13,12 +14,14 @@ import useTFLite from './core/hooks/useTFLite'
 
 function App() {
   const classes = useStyles()
+  const isDesktop = useMediaQuery('(min-width:960px)');
+
   const [sourceConfig, setSourceConfig] = useState<SourceConfig>({
-    type: 'camera',
+    type: isDesktop ? 'image' : 'camera',
     url: sourceImageUrls[0],
   })
   const [backgroundConfig, setBackgroundConfig] = useState<BackgroundConfig>({
-    type: 'blur',
+    type: 'none',
   })
   const [segmentationConfig, setSegmentationConfig] =
     useState<SegmentationConfig>({
@@ -51,30 +54,38 @@ function App() {
   }, [isSIMDSupported])
 
   return (
-    <div className={classes.root}>
-      <ViewerCard
-        sourceConfig={sourceConfig}
-        backgroundConfig={backgroundConfig}
-        segmentationConfig={segmentationConfig}
-        postProcessingConfig={postProcessingConfig}
-        bodyPix={bodyPix}
-        tflite={tflite}
-      />
-      {/* <SourceConfigCard config={sourceConfig} onChange={setSourceConfig} /> */}
-      <BackgroundConfigCard
-        config={backgroundConfig}
-        onChange={setBackgroundConfig}
-      />
-      {/* <SegmentationConfigCard
-        config={segmentationConfig}
-        isSIMDSupported={isSIMDSupported}
-        onChange={setSegmentationConfig}
-      />
-      <PostProcessingConfigCard
-        config={postProcessingConfig}
-        pipeline={segmentationConfig.pipeline}
-        onChange={setPostProcessingConfig}
-      />  */}
+
+    <div className={classes.root} >
+      {!isDesktop ? (
+        <>
+          <ViewerCard
+            sourceConfig={sourceConfig}
+            backgroundConfig={backgroundConfig}
+            segmentationConfig={segmentationConfig}
+            postProcessingConfig={postProcessingConfig}
+            bodyPix={bodyPix}
+            tflite={tflite}
+          />
+          <BackgroundConfigCard
+            config={backgroundConfig}
+            onChange={setBackgroundConfig}
+          />
+        </>
+      ) : (
+        <>
+          <div className={classes.desktopRoot}>
+            <h1 className={classes.title}>My QR Code Page</h1>
+            <Grid container justify="center" alignItems="center" className={classes.content} style={{ height: '100%' }}>
+              <Grid item xs={12} sm={6} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <object type="image/svg+xml" data={`${process.env.PUBLIC_URL}/qr_code.svg`} className={classes.qrCodeImage} style={{ maxWidth: '20vw' }}>
+                  Your browser does not support SVG
+                </object>
+                <p className={classes.description}>Scan the QR Code to learn more!</p>
+              </Grid>
+            </Grid>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -102,6 +113,37 @@ const useStyles = makeStyles((theme: Theme) =>
       // [theme.breakpoints.up('lg')]: {
       //   gridTemplateColumns: 'repeat(3, 1fr)',
       // },
+    },
+
+    desktopRoot: {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh',
+    },
+    title: {
+      position: 'absolute',
+      fontSize: '3rem',
+      textAlign: 'center',
+      fontWeight: 'bold',
+      top: '10%',
+      marginBottom: theme.spacing(4),
+    },
+    content: {
+      flexGrow: 1,
+    },
+    qrCodeImage: {
+      display: 'block',
+      maxWidth: '20vw',
+      height: 'auto',
+      marginBottom: theme.spacing(2),
+    },
+    description: {
+      textAlign: 'center',
+      margin: 0,
+      fontSize: '1.5rem',
+      fontWeight: 'bold',
     },
     // resourceSelectionCards: {
     //   display: 'flex',

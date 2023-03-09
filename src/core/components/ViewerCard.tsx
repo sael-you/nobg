@@ -33,6 +33,8 @@ function ViewerCard(props: ViewerCardProps) {
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
   let isVideo: Boolean;
+  const isDesktop = useMediaQuery('(min-width:960px)');
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
   // const handleSave = (imageSource: string) => {
   //   const timestamp = new Date().getTime().toString();
   //   const extension = isVideo ? 'mp4' : 'png';
@@ -78,8 +80,6 @@ function ViewerCard(props: ViewerCardProps) {
     }
   };
 
-  const isDesktop = useMediaQuery('(min-width:960px)');
-  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 
   const [ImageSource, setImageSource] = useState('')
   useEffect(() => {
